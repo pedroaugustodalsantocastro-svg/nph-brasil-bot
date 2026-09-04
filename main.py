@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from threading import Thread
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 app = Flask(__name__)
@@ -12,9 +12,16 @@ def home():
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("💎 ENTRAR NO VIP", callback_data="comprar")]
+    ]
+
     await update.message.reply_text(
         "🔥 Bem-vindo ao NPH_BRASIL VIP!\n\n"
-        "🤖 Bot online e funcionando."
+        "💎 Acesso ao conteúdo VIP\n"
+        "💰 Valor: R$ 9,90\n\n"
+        "👇 Clique no botão abaixo:",
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 
