@@ -1,6 +1,4 @@
 import os
-from flask import Flask
-from threading import Thread
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -8,13 +6,6 @@ from telegram.ext import (
     CallbackQueryHandler,
     ContextTypes,
 )
-
-app = Flask(__name__)
-
-
-@app.route("/")
-def home():
-    return "NPH_BRASIL BOT ONLINE", 200
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -38,13 +29,8 @@ async def entrar_vip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_text(
         "💳 Vamos realizar seu pagamento!\n\n"
         "💰 Valor: R$ 9,90\n\n"
-        "⏳ Aguarde enquanto preparamos o pagamento."
+        "⌛ Aguarde enquanto preparamos o pagamento."
     )
-
-
-def run_web():
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
 
 
 def main():
@@ -53,14 +39,19 @@ def main():
     if not token:
         raise RuntimeError("TELEGRAM_BOT_TOKEN não configurado")
 
-    Thread(target=run_web, daemon=True).start()
-
     application = Application.builder().token(token).build()
 
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(entrar_vip, pattern="^entrar_vip$"))
+    application.add_handler(
+        CallbackQueryHandler(entrar_vip, pattern="^entrar_vip$")
+    )
 
-    application.run_polling()
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 10000)),
+        url_path="telegram",
+        webhook_url="https://nph-brasil-bot.onrender.com/telegram",
+    )
 
 
 if __name__ == "__main__":
