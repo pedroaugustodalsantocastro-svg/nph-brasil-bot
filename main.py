@@ -9,9 +9,7 @@ from telegram.ext import (
     Application,
     CommandHandler,
     CallbackQueryHandler,
-    MessageHandler,
     ContextTypes,
-    filters,
 )
 
 
@@ -22,12 +20,10 @@ GROUP_ID = os.environ.get("TELEGRAM_GROUP_ID")
 BASE_URL = "https://nph-brasil-bot.onrender.com"
 PRICE = 9.90
 
+VIDEO_FILE_ID = "BAACAgEAAxkBAAIBgGqcI4UvqPreoCrFHYBKs72o2N-pAALkBgACjWDgRBBC23CCUUZsPQQ"
+
 sdk = mercadopago.SDK(MP_TOKEN)
 
-
-# =========================
-# /START
-# =========================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -40,52 +36,28 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ]
 
-    await update.message.reply_text(
-        "🚨Vidios quentes que você quer ?\n\n"
-        "Economize MUITO pagando apenas umas vez!!\n\n"
-        "Vidios novos todos os dias\n\n"
-        "Mais de 3 mil Vidios para não enjoar\n\n"
-        "Grupo privado e 100% reservado não mostra quem você é\n\n"
-        "Os melhores Vidios estão aqui",
+    await update.message.reply_video(
+        video=VIDEO_FILE_ID,
+        caption=(
+            "🚨Vidios quentes que você quer ?\n\n"
+            "Economize MUITO pagando apenas umas vez!!\n\n"
+            "Vidios novos todos os dias\n\n"
+            "Mais de 3 mil Vidios para não enjoar\n\n"
+            "Grupo privado e 100% reservado não mostra quem você é\n\n"
+            "Os melhores Vidios estão aqui"
+        ),
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
-
-# =========================
-# MOSTRAR ID DO GRUPO
-# =========================
 
 async def mostrar_id(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
 ):
-
     await update.message.reply_text(
         f"ID do grupo: {update.effective_chat.id}"
     )
 
-
-# =========================
-# PEGAR ID DO VÍDEO
-# =========================
-
-async def pegar_video_id(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
-
-    if update.message and update.message.video:
-
-        video_id = update.message.video.file_id
-
-        await update.message.reply_text(
-            f"VIDEO_FILE_ID:\n{video_id}"
-        )
-
-
-# =========================
-# GERAR PAGAMENTO
-# =========================
 
 async def entrar_vip(
     update: Update,
@@ -120,11 +92,9 @@ async def entrar_vip(
         payment_url = result["response"].get("init_point")
 
         if not payment_url:
-
             await query.message.reply_text(
                 "❌ Não conseguimos gerar o pagamento."
             )
-
             return
 
         keyboard = [
@@ -156,10 +126,6 @@ async def entrar_vip(
             "❌ Erro ao gerar pagamento. Tente novamente."
         )
 
-
-# =========================
-# WEBHOOK TELEGRAM
-# =========================
 
 async def telegram_webhook(request):
 
@@ -193,10 +159,6 @@ async def telegram_webhook(request):
         )
 
 
-# =========================
-# WEBHOOK MERCADO PAGO
-# =========================
-
 async def mercado_pago_webhook(request):
 
     try:
@@ -210,12 +172,6 @@ async def mercado_pago_webhook(request):
             data = await request.json()
         except Exception:
             data = {}
-
-        print(
-            "DADOS WEBHOOK:",
-            data,
-            flush=True
-        )
 
         payment_id = None
 
@@ -236,22 +192,10 @@ async def mercado_pago_webhook(request):
             payment_id = request.query.get("id")
 
         if not payment_id:
-
-            print(
-                "WEBHOOK SEM PAYMENT_ID",
-                flush=True
-            )
-
             return web.Response(
                 text="OK",
                 status=200
             )
-
-        print(
-            "PAYMENT ID:",
-            payment_id,
-            flush=True
-        )
 
         result = await asyncio.to_thread(
             sdk.payment().get,
@@ -267,16 +211,6 @@ async def mercado_pago_webhook(request):
         external_reference = payment.get("external_reference")
         amount = payment.get("transaction_amount")
 
-        print(
-            "STATUS:",
-            status,
-            "USUARIO:",
-            external_reference,
-            "VALOR:",
-            amount,
-            flush=True
-        )
-
         if (
             status == "approved"
             and external_reference
@@ -286,12 +220,6 @@ async def mercado_pago_webhook(request):
             user_id = int(external_reference)
 
             if not GROUP_ID:
-
-                print(
-                    "ERRO: TELEGRAM_GROUP_ID NÃO CONFIGURADO",
-                    flush=True
-                )
-
                 return web.Response(
                     text="OK",
                     status=200
@@ -320,12 +248,6 @@ async def mercado_pago_webhook(request):
                 ),
             )
 
-            print(
-                "ACESSO LIBERADO PARA:",
-                user_id,
-                flush=True
-            )
-
         return web.Response(
             text="OK",
             status=200
@@ -345,20 +267,12 @@ async def mercado_pago_webhook(request):
         )
 
 
-# =========================
-# PÁGINA INICIAL
-# =========================
-
 async def home(request):
 
     return web.Response(
         text="NPH_BRASIL BOT ONLINE"
     )
 
-
-# =========================
-# INICIAR BOT
-# =========================
 
 async def main():
 
@@ -401,15 +315,7 @@ async def main():
         )
     )
 
-    telegram_app.add_handler(
-        MessageHandler(
-            filters.VIDEO,
-            pegar_video_id
-        )
-    )
-
     await telegram_app.initialize()
-
     await telegram_app.start()
 
     await telegram_app.bot.set_webhook(
@@ -418,10 +324,7 @@ async def main():
 
     app = web.Application()
 
-    app.router.add_get(
-        "/",
-        home
-    )
+    app.router.add_get("/", home)
 
     app.router.add_post(
         "/telegram",
