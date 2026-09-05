@@ -13,10 +13,6 @@ from telegram.ext import (
 )
 
 
-# =========================
-# CONFIGURAÇÕES
-# =========================
-
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 MP_TOKEN = os.environ.get("MERCADO_PAGO_ACCESS_TOKEN")
 GROUP_ID = os.environ.get("TELEGRAM_GROUP_ID")
@@ -26,10 +22,6 @@ PRICE = 9.90
 
 sdk = mercadopago.SDK(MP_TOKEN)
 
-
-# =========================
-# /START
-# =========================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -43,31 +35,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     await update.message.reply_text(
-        "🔥 Bem-vindo ao NPH_BRASIL VIP!\n\n"
-        "💎 Acesso ao conteúdo VIP\n"
-        "💰 Valor: R$ 9,90\n\n"
-        "👇 Clique no botão abaixo:",
+        "🚨Vidios quentes que você quer ?\n\n"
+        "Economize MUITO pagando apenas umas vez!!\n\n"
+        "Vidios novos todos os dias\n\n"
+        "Mais de 3 mil Vidios para não enjoar\n\n"
+        "Grupo privado e 100% reservado não mostra quem você é\n\n"
+        "Os melhores Vidios estão aqui",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
-
-# =========================
-# MOSTRAR ID DO GRUPO
-# =========================
 
 async def mostrar_id(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
 ):
-
     await update.message.reply_text(
         f"ID do grupo: {update.effective_chat.id}"
     )
 
-
-# =========================
-# GERAR PAGAMENTO
-# =========================
 
 async def entrar_vip(
     update: Update,
@@ -88,9 +73,7 @@ async def entrar_vip(
                 "unit_price": PRICE,
             }
         ],
-
         "external_reference": str(user_id),
-
         "notification_url": f"{BASE_URL}/mercadopago",
     }
 
@@ -139,10 +122,6 @@ async def entrar_vip(
         )
 
 
-# =========================
-# WEBHOOK TELEGRAM
-# =========================
-
 async def telegram_webhook(request):
 
     try:
@@ -174,10 +153,6 @@ async def telegram_webhook(request):
             status=200
         )
 
-
-# =========================
-# WEBHOOK MERCADO PAGO
-# =========================
 
 async def mercado_pago_webhook(request):
 
@@ -341,20 +316,12 @@ async def mercado_pago_webhook(request):
         )
 
 
-# =========================
-# PÁGINA INICIAL
-# =========================
-
 async def home(request):
 
     return web.Response(
         text="NPH_BRASIL BOT ONLINE"
     )
 
-
-# =========================
-# INICIAR BOT
-# =========================
 
 async def main():
 
