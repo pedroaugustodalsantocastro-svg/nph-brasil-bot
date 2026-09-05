@@ -34,7 +34,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "👇 Clique no botão abaixo:",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
-
+async def mostrar_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(f"ID do grupo: {update.effective_chat.id}")
 
 async def entrar_vip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -164,7 +165,7 @@ async def main():
         raise RuntimeError("MERCADO_PAGO_ACCESS_TOKEN não configurado")
 
     telegram_app = Application.builder().token(TELEGRAM_TOKEN).build()
-
+telegram_app.add_handler(CommandHandler("id", mostrar_id))
     telegram_app.add_handler(CommandHandler("start", start))
     telegram_app.add_handler(
         CallbackQueryHandler(entrar_vip, pattern="^entrar_vip$")
